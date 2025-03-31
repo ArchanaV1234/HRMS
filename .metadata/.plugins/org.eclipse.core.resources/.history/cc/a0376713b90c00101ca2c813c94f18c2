@@ -1,0 +1,31 @@
+package com.excelr.service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.excelr.model.Attendance;
+import com.excelr.repo.AttendanceRepository;
+
+import java.util.List;
+
+@Service
+public class AttendanceService {
+
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    public List<Attendance> getAllAttendanceRecords() {
+        return attendanceRepository.findAll();
+    }
+
+    public Attendance getAttendanceById(Long id) {
+        return attendanceRepository.findById(id).orElse(null);
+    }
+
+    public Attendance addAttendance(Attendance attendance) {
+        return attendanceRepository.save(attendance);
+    }
+
+    public void deleteAttendance(Long id) {
+        attendanceRepository.deleteById(id);
+    }
+}

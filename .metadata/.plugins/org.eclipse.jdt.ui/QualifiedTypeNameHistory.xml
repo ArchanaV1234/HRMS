@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="com.excelr.repo.UserRepository"/>
+    <fullyQualifiedTypeName name="com.excelr.repo.PayrollRepository"/>
+    <fullyQualifiedTypeName name="com.excelr.repo.AttendanceRepository"/>
+    <fullyQualifiedTypeName name="org.springframework.http.HttpMethod"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.Table"/>
+    <fullyQualifiedTypeName name="com.excelr.repo.EmployeeRepository"/>
+    <fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+    <fullyQualifiedTypeName name="com.excelr.repo.LeaveRepository"/>
+</qualifiedTypeNameHistroy>

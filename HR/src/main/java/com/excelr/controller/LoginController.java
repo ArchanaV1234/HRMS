@@ -1,0 +1,77 @@
+package com.excelr.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import com.excelr.model.User;
+import com.excelr.model.Employee;
+import com.excelr.repo.UserRepository;
+import com.excelr.repo.EmployeeRepository;
+import com.excelr.controller.JwtTokenUtil;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class LoginController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        // Check both users and employees by username
+        User user = userRepository.findByUsername(loginRequest.getUsername());
+        Employee employee = employeeRepository.findByUsername(loginRequest.getUsername()).orElse(null);
+
+        // Check user credentials
+        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            return generateResponse(user.getUsername(), loginRequest.getPassword(), user.getRole(), user.getId());
+        }
+
+        // Check employee credentials
+        if (employee != null && passwordEncoder.matches(loginRequest.getPassword(), employee.getPassword())) {
+            return generateResponse(employee.getUsername(), loginRequest.getPassword(), employee.getRole(), employee.getId());
+        }
+
+        // Invalid credentials
+        return ResponseEntity.status(401).body("Invalid username or password!");
+    }
+
+    private ResponseEntity<?> generateResponse(String username, String plainPassword, String role, Long id) {
+        // Authenticate the user or employee using the plain text password
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(username, plainPassword)
+        );
+
+        // Generate JWT token
+        String token = jwtTokenUtil.generateToken(authentication);
+
+        // Create response object
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("role", role);
+        response.put("id", id);
+        response.put("message", "Login successful");
+
+        return ResponseEntity.ok(response);
+    }
+}

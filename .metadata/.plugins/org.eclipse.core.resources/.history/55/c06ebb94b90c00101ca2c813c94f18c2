@@ -1,0 +1,28 @@
+package com.excelr.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.Date;
+
+@Entity
+@Table(name = "attendance")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Attendance {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
+
+
+    @Temporal(TemporalType.DATE)
+    private Date date;
+
+    private boolean present;
+}

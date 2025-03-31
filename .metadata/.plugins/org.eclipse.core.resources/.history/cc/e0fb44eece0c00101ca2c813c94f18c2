@@ -1,0 +1,17 @@
+package com.excelr.model;
+
+@Entity
+public class Leave {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String reason;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String status;
+
+    @ManyToOne
+    private Employee employee;
+
+    // Getters and Setters
+}

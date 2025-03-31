@@ -1,0 +1,25 @@
+package com.excelr.controller;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            return ResponseEntity.badRequest().body("Username already exists!");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
+        user.setRole("ROLE_" + user.getRole().toUpperCase()); // Ensure ROLE_ prefix
+        userRepository.save(user);
+
+        return ResponseEntity.ok("User registered successfully!");
+    }
+}

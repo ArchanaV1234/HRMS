@@ -1,0 +1,44 @@
+
+
+package com.excelr.controller;
+
+import java.time.LocalDate;
+public class PayrollRequest {
+        private Long employeeId;
+        private double basicSalary;
+        private double deductions;
+        private LocalDate payPeriod;
+
+        // Getters and Setters
+        public Long getEmployeeId() {
+            return employeeId;
+        }
+
+        public void setEmployeeId(Long employeeId) {
+            this.employeeId = employeeId;
+        }
+
+        public double getBasicSalary() {
+            return basicSalary;
+        }
+
+        public void setBasicSalary(double basicSalary) {
+            this.basicSalary = basicSalary;
+        }
+
+        public double getDeductions() {
+            return deductions;
+        }
+
+        public void setDeductions(double deductions) {
+            this.deductions = deductions;
+        }
+
+        public LocalDate getPayPeriod() {
+            return payPeriod;
+        }
+
+        public void setPayPeriod(LocalDate payPeriod) {
+            this.payPeriod = payPeriod;
+        }
+    }

@@ -1,0 +1,24 @@
+package com.excelr.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.excelr.model.Leave;
+import com.excelr.repo.LeaveRepository;
+
+@Service
+public class LeaveService {
+
+    @Autowired
+    private LeaveRepository leaveRepository;
+
+    public Leave applyLeave(Leave leave) {
+        return leaveRepository.save(leave);
+    }
+
+    public List<Leave> getLeavesByEmployeeId(Long employeeId) {
+        return leaveRepository.findByEmployeeId(employeeId);
+    }
+}

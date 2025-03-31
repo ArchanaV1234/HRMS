@@ -1,0 +1,32 @@
+package com.excelr.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.excelr.model.Payroll;
+import com.excelr.repo.PayrollRepository;
+
+import java.util.List;
+
+@Service
+public class PayrollService {
+
+    @Autowired
+    private PayrollRepository payrollRepository;
+
+    public List<Payroll> getAllPayrolls() {
+        return payrollRepository.findAll();
+    }
+
+    public Payroll getPayrollById(Long id) {
+        return payrollRepository.findById(id).orElse(null);
+    }
+
+    public Payroll addPayroll(Payroll payroll) {
+        return payrollRepository.save(payroll);
+    }
+
+    public void deletePayroll(Long id) {
+        payrollRepository.deleteById(id);
+    }
+}

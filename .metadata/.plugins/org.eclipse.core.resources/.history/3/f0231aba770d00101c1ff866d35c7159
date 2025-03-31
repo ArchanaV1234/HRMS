@@ -1,0 +1,19 @@
+package com.excelr.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.excelr.model.Employee;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+    // Fetch all employees
+    List<Employee> findAll();
+
+    // Fetch an employee by ID
+    Optional<Employee> findById(Long id);
+
+    // Save an employee (add or update)
+    Employee save(Employee employee);
+}

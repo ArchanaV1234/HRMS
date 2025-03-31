@@ -1,0 +1,15 @@
+package com.excelr.service;
+@Service
+public class LeaveService {
+
+    @Autowired
+    private LeaveRepository leaveRepository;
+
+    public Leave applyLeave(Leave leave) {
+        return leaveRepository.save(leave);
+    }
+
+    public List<Leave> getLeavesByEmployeeId(Long employeeId) {
+        return leaveRepository.findByEmployeeId(employeeId);
+    }
+}

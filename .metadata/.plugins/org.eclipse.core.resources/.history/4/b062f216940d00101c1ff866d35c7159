@@ -1,0 +1,5 @@
+package com.excelr.exception;
+
+public class ResourceNotFoundException {
+
+}

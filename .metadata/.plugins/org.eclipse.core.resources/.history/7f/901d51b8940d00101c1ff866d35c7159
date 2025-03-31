@@ -1,0 +1,45 @@
+package com.excelr.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.excelr.model.Attendance;
+import com.excelr.model.Employee;
+import com.excelr.repo.AttendanceRepository;
+import com.excelr.repo.EmployeeRepository;
+
+import java.util.List;
+
+@Service
+public class AttendanceService {
+
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    public List<Attendance> getAllAttendanceRecords() {
+        return attendanceRepository.findAll();
+    }
+
+    public Attendance getAttendanceById(Long id) {
+        return attendanceRepository.findById(id).orElse(null);
+    }
+
+    public Attendance addAttendance(Attendance attendance) {
+        if (attendance.getEmployee() != null && attendance.getEmployee().getId() != null) {
+            Employee employee = employeeRepository.findById(attendance.getEmployee().getId()).orElse(null);
+            if (employee != null) {
+                attendance.setEmployee(employee);
+            } else {
+                throw new RuntimeException("Employee not found with ID: " + attendance.getEmployee().getId());
+            }
+        }
+        return attendanceRepository.save(attendance);
+    }
+
+    public void deleteAttendance(Long id) {
+        attendanceRepository.deleteById(id);
+    }
+}

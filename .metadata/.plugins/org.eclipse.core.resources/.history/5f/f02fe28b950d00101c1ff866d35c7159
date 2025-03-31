@@ -1,0 +1,30 @@
+package com.excelr.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import com.excelr.model.Leave;
+import com.excelr.service.LeaveService;
+
+@RestController
+@RequestMapping("/api/leaves")
+public class LeaveController {
+
+    @Autowired
+    private LeaveService leaveService;
+
+    // HR can apply leave on behalf of an employee if needed, or simply review leave applications.
+    @PostMapping
+    public Leave applyLeave(@RequestBody Leave leave) {
+        return leaveService.applyLeave(leave);
+    }
+
+    // Get leaves by employee id – HR can view the leave records for any employee.
+    @GetMapping("/employee/{id}")
+    public List<Leave> getLeavesByEmployeeId(@PathVariable Long id) {
+        return leaveService.getLeavesByEmployeeId(id);
+    }
+}

@@ -1,0 +1,33 @@
+
+package com.excelr.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.excelr.model.Employee;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+    List<Employee> findAll();
+
+    Optional<Employee> findById(Long id);
+
+    Employee save(Employee employee);
+
+    List<Employee> findByName(String name);
+
+    List<Employee> findByEmail(String email);
+
+    List<Employee> findByPhone(String phone);
+
+    List<Employee> findByDepartment(String department);
+
+    List<Employee> findByRole(String role);
+
+    List<Employee> findBySalaryGreaterThanEqual(double salary);
+
+    List<Employee> findByJoiningDateBetween(java.util.Date startDate, java.util.Date endDate);
+
+    List<Employee> findByNameAndDepartment(String name, String department);
+}

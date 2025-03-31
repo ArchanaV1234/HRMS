@@ -1,0 +1,149 @@
+//package com.excelr.config;
+//
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.security.authentication.AuthenticationManager;
+//import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+//import org.springframework.security.config.http.SessionCreationPolicy;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.web.SecurityFilterChain;
+//import org.springframework.web.cors.CorsConfiguration;
+//import org.springframework.web.cors.CorsConfigurationSource;
+//import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+//
+//import java.util.Arrays;
+//
+//@Configuration
+//@EnableWebSecurity
+//public class SecurityConfig {
+//
+//	 @Bean
+//	    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//	        http
+//	            .csrf(csrf -> csrf.disable())
+//	            .authorizeHttpRequests(auth -> auth
+//	                .requestMatchers("/api/auth/**").permitAll()
+//	                .requestMatchers("/api/employees/**").permitAll()
+//	                .requestMatchers("/api/attendance/**", "/api/leaves/**", "/api/payrolls/**").permitAll()
+//	                .anyRequest().authenticated()
+//	            )
+//	            .sessionManagement(session -> session
+//	                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//	            );
+//
+//	        return http.build();
+//	    }
+//
+//
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        // Allow your front-end origin (update as needed)
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+//        // Allow all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
+//        configuration.setAllowedMethods(Arrays.asList("*"));
+//        // Allow all headers
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
+//        configuration.setAllowCredentials(true);
+//        
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        // Apply this configuration to all endpoints
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        // BCryptPasswordEncoder is used for encoding passwords
+//        return new BCryptPasswordEncoder();
+//    }
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
+//}
+package com.excelr.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity // Required for @PreAuthorize annotations
+public class SecurityConfig {
+
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	    http
+	        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+	        .csrf(csrf -> csrf.disable())
+	        .authorizeHttpRequests(auth -> auth
+	            // Specific patterns first
+	            .requestMatchers(HttpMethod.POST, "/api/attendance").permitAll()
+	            .requestMatchers(HttpMethod.POST, "/api/attendance/{employeeId}/checkin").permitAll()
+	            .requestMatchers(HttpMethod.POST, "/api/attendance/{employeeId}/checkout").permitAll()
+	            .requestMatchers(HttpMethod.GET, "/api/attendance/{employeeId}").permitAll()
+	            .requestMatchers(HttpMethod.POST, "/api/payrolls").permitAll()
+	            .requestMatchers(HttpMethod.GET, "/api/payrolls/**").permitAll()
+	            .requestMatchers(HttpMethod.DELETE, "/api/payrolls/**").hasRole("HR")
+	            // Public endpoints
+	            .requestMatchers("/api/auth/**").permitAll()
+	            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+	            
+	            // All other requests
+	            .anyRequest().authenticated()
+	        )
+	        .sessionManagement(session -> session
+	            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	        );
+	    
+	    return http.build();
+	}
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173", // Vue/React
+            "http://localhost:3000", // React
+            "http://localhost:4200"  // Angular
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // 1 hour
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}

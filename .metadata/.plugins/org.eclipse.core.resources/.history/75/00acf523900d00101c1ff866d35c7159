@@ -1,0 +1,50 @@
+package com.excelr.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.excelr.model.Attendance;
+import com.excelr.model.Employee;
+import com.excelr.service.AttendanceService;
+import com.excelr.service.EmployeeService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/attendance")
+public class AttendanceController {
+
+    @Autowired
+    private AttendanceService attendanceService;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @GetMapping
+    public List<Attendance> getAllAttendanceRecords() {
+        return attendanceService.getAllAttendanceRecords();
+    }
+
+    @GetMapping("/{id}")
+    public Attendance getAttendanceById(@PathVariable Long id) {
+        return attendanceService.getAttendanceById(id);
+    }
+
+    @PostMapping
+    public Attendance addAttendance(@RequestBody Attendance attendance) {
+        if (attendance.getEmployee() != null && attendance.getEmployee().getId() != null) {
+            Employee employee = employeeService.getEmployeeById(attendance.getEmployee().getId());
+            if (employee != null) {
+                attendance.setEmployee(employee);
+            } else {
+                throw new RuntimeException("Employee not found with ID: " + attendance.getEmployee().getId());
+            }
+        }
+        return attendanceService.addAttendance(attendance);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteAttendance(@PathVariable Long id) {
+        attendanceService.deleteAttendance(id);
+    }
+}

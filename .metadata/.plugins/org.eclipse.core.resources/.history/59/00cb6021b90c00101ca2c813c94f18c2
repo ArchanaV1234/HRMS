@@ -1,0 +1,37 @@
+package com.excelr.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.excelr.model.Attendance;
+import com.excelr.service.AttendanceService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/attendance")
+public class AttendanceController {
+
+    @Autowired
+    private AttendanceService attendanceService;
+
+    @GetMapping
+    public List<Attendance> getAllAttendanceRecords() {
+        return attendanceService.getAllAttendanceRecords();
+    }
+
+    @GetMapping("/{id}")
+    public Attendance getAttendanceById(@PathVariable Long id) {
+        return attendanceService.getAttendanceById(id);
+    }
+
+    @PostMapping
+    public Attendance addAttendance(@RequestBody Attendance attendance) {
+        return attendanceService.addAttendance(attendance);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteAttendance(@PathVariable Long id) {
+        attendanceService.deleteAttendance(id);
+    }
+}

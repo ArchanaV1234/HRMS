@@ -1,0 +1,25 @@
+package com.excelr.model;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "payroll")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Payroll {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
+
+    private double basicSalary;
+    private double deductions;
+    private double netSalary;
+}

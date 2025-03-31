@@ -1,0 +1,32 @@
+package com.excelr.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.excelr.model.Leave;
+import com.excelr.service.LeaveService;
+
+@RestController
+@RequestMapping("/api/leaves")
+public class LeaveController {
+
+    @Autowired
+    private LeaveService leaveService;
+
+    @PostMapping
+    public Leave applyLeave(@RequestBody Leave leave) {
+        return leaveService.applyLeave(leave);
+    }
+
+    @GetMapping("/employee/{id}")
+    public List<Leave> getLeavesByEmployeeId(@PathVariable Long id) {
+        return leaveService.getLeavesByEmployeeId(id);
+    }
+}

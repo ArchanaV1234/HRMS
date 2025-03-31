@@ -1,0 +1,50 @@
+package com.excelr.controller;
+
+import com.excelr.model.Attendance;
+import com.excelr.service.AttendanceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/attendance")
+public class AttendanceController {
+
+    @Autowired
+    private AttendanceService attendanceService;
+
+    @PostMapping
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<Attendance> markAttendance(@RequestBody Attendance attendance) {
+        return ResponseEntity.ok(attendanceService.markAttendance(attendance));
+    }
+
+    @PostMapping("/{employeeId}")
+    public ResponseEntity<Attendance> checkIn(@PathVariable Long employeeId) {
+        return ResponseEntity.ok(attendanceService.checkIn(employeeId));
+    }
+
+    @PostMapping("/{employeeId}")
+    public ResponseEntity<Attendance> checkOut(@PathVariable Long employeeId) {
+        return ResponseEntity.ok(attendanceService.checkOut(employeeId));
+    }
+
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<List<Attendance>> getEmployeeAttendance(
+            @PathVariable Long employeeId) {
+        return ResponseEntity.ok(attendanceService.getAttendanceByEmployee(employeeId));
+    }
+
+    @GetMapping("/period")
+    public ResponseEntity<List<Attendance>> getAttendanceForPeriod(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        return ResponseEntity.ok(attendanceService.getAttendanceBetweenDates(start, end));
+    }
+}

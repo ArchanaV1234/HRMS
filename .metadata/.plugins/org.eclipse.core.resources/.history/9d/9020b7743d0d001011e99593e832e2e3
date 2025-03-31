@@ -1,0 +1,180 @@
+//package com.excelr.controller;
+//
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.bind.annotation.*;
+//
+//import com.excelr.model.Employee;
+//import com.excelr.service.EmployeeService;
+//
+//import java.util.List;
+//
+//@RestController
+//@RequestMapping("/api/employees")
+//public class EmployeeController {
+//
+//    @Autowired
+//    private EmployeeService employeeService;
+//
+//    @GetMapping
+//    public ResponseEntity<List<Employee>> getAllEmployees() {
+//        List<Employee> employees = employeeService.getAllEmployees();
+//        return new ResponseEntity<>(employees, HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+//        Employee employee = employeeService.getEmployeeById(id);
+//        if (employee != null) {
+//            return new ResponseEntity<>(employee, HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
+//
+//    @PostMapping
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public Employee addEmployee(@RequestBody Employee employee) {
+//        return employeeService.addEmployee(employee);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+//        Employee employee = employeeService.getEmployeeById(id);
+//        if (employee != null) {
+//            employeeService.deleteEmployee(id);
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
+//}
+
+package com.excelr.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.excelr.model.Employee;
+import com.excelr.service.EmployeeService;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/employees")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(Map.of(
+            "status", "success",
+            "data", employees,
+            "message", employees.isEmpty() ? "No employees found" : "Employees retrieved successfully"
+        ));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getEmployeeById(@PathVariable Long id) {
+        try {
+            Employee employee = employeeService.getEmployeeById(id);
+            if (employee != null) {
+                return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "data", employee,
+                    "message", "Employee retrieved successfully"
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "status", "error",
+                    "message", "Employee not found with id: " + id
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "status", "error",
+                "message", "Error retrieving employee: " + e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> addEmployee(@RequestBody Employee employee) {
+        try {
+            Employee savedEmployee = employeeService.addEmployee(employee);
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedEmployee.getId())
+                .toUri();
+            
+            return ResponseEntity.created(location).body(Map.of(
+                "status", "success",
+                "data", savedEmployee,
+                "message", "Employee created successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "status", "error",
+                "message", "Error creating employee: " + e.getMessage()
+            ));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> updateEmployee(
+            @PathVariable Long id, 
+            @RequestBody Employee employee) {
+        try {
+            Employee updatedEmployee = employeeService.updateEmployee(id, employee);
+            if (updatedEmployee != null) {
+                return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "data", updatedEmployee,
+                    "message", "Employee updated successfully"
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "status", "error",
+                    "message", "Employee not found with id: " + id
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "status", "error",
+                "message", "Error updating employee: " + e.getMessage()
+            ));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> deleteEmployee(@PathVariable Long id) {
+        try {
+            boolean deleted = employeeService.deleteEmployee(id);
+            if (deleted) {
+                return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "Employee deleted successfully"
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "status", "error",
+                    "message", "Employee not found with id: " + id
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "status", "error",
+                "message", "Error deleting employee: " + e.getMessage()
+            ));
+        }
+    }
+}

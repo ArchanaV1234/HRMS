@@ -1,0 +1,79 @@
+package com.excelr.controller;
+
+import com.excelr.exception.ResourceNotFoundException;
+import com.excelr.model.Employee;
+import com.excelr.model.Payroll;
+import com.excelr.repo.EmployeeRepository;
+import com.excelr.repo.PayrollRepository;
+import com.excelr.service.PayrollService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/payrolls")
+public class PayrollController {
+
+    @Autowired
+    private PayrollService payrollService;
+    
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    
+    @Autowired
+    private PayrollRepository payrollRepository;
+
+    @PostMapping
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<Payroll> createPayroll(@RequestBody PayrollRequest request) {
+        Payroll payroll = new Payroll();
+        
+        // Fetch the full employee from database
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        
+        payroll.setEmployee(employee);
+        payroll.setBasicSalary(request.getBasicSalary());
+        payroll.setDeductions(request.getDeductions());
+        payroll.setPayPeriod(request.getPayPeriod());
+        payroll.setNetSalary(request.getBasicSalary() - request.getDeductions());
+        
+        Payroll savedPayroll = payrollRepository.save(payroll);
+        return ResponseEntity.ok(savedPayroll);
+    }
+
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<Payroll>> getEmployeePayrolls(
+            @PathVariable Long employeeId) {
+        List<Payroll> payrolls = payrollRepository.findByEmployeeId(employeeId);
+        return ResponseEntity.ok(payrolls);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getPayrollById(@PathVariable Long id) {
+        Employee payroll = payrollRepository.findByIdWithEmployee(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payroll not found"));
+        return ResponseEntity.ok(payroll);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<Void> deletePayroll(@PathVariable Long id) {
+        payrollService.deletePayroll(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generate/{employeeId}")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<Payroll> generateMonthlyPayroll(
+            @PathVariable Long employeeId,
+            @RequestParam int year,
+            @RequestParam int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        return ResponseEntity.ok(payrollService.generateMonthlyPayroll(employeeId, yearMonth));
+    }}

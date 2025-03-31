@@ -1,0 +1,95 @@
+package com.excelr.service;
+
+import com.excelr.model.Attendance;
+import com.excelr.repo.AttendanceRepository;
+import com.excelr.repo.EmployeeRepository;
+import com.excelr.exception.ResourceNotFoundException;
+import com.excelr.exception.InvalidDataException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class AttendanceService {
+
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Transactional
+    public Attendance markAttendance(Attendance attendance) {
+        validateAttendance(attendance);
+        
+        if (attendanceRepository.existsByEmployeeIdAndDate(
+            attendance.getEmployee().getId(), 
+            attendance.getDate())) {
+            throw new InvalidDataException("Attendance already recorded for this date");
+        }
+        
+        return attendanceRepository.save(attendance);
+    }
+
+    @Transactional
+    public Attendance checkIn(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        
+        LocalDate today = LocalDate.now();
+        
+        Optional<Attendance> existing = attendanceRepository.findByEmployeeIdAndDate(employeeId, today);
+        if (existing.isPresent()) {
+            throw new InvalidDataException("Already checked in today");
+        }
+        
+        Attendance attendance = new Attendance();
+        attendance.setEmployee(employee);
+        attendance.setDate(today);
+        attendance.setPresent(true);
+        
+        return attendanceRepository.save(attendance);
+    }
+
+    @Transactional
+    public Attendance checkOut(Long employeeId) {
+        LocalDate today = LocalDate.now();
+        
+        Attendance attendance = attendanceRepository.findByEmployeeIdAndDate(employeeId, today)
+                .orElseThrow(() -> new InvalidDataException("You must check in first"));
+        
+        if (!attendance.isPresent()) {
+            throw new InvalidDataException("You are marked absent today");
+        }
+        
+        return attendance;
+    }
+
+    public List<Attendance> getAttendanceByEmployee(Long employeeId) {
+        return attendanceRepository.findByEmployeeId(employeeId);
+    }
+
+    public List<Attendance> getAttendanceBetweenDates(LocalDate startDate, LocalDate endDate) {
+        return attendanceRepository.findByDateBetween(startDate, endDate);
+    }
+
+    public long getPresentDaysCount(Long employeeId, LocalDate startDate, LocalDate endDate) {
+        return attendanceRepository.countByEmployeeIdAndDateBetweenAndPresentTrue(employeeId, startDate, endDate);
+    }
+
+    private void validateAttendance(Attendance attendance) {
+        if (attendance.getEmployee() == null || attendance.getEmployee().getId() == null) {
+            throw new InvalidDataException("Employee must be specified");
+        }
+        if (attendance.getDate() == null) {
+            throw new InvalidDataException("Date must be specified");
+        }
+        if (attendance.getDate().isAfter(LocalDate.now())) {
+            throw new InvalidDataException("Attendance date cannot be in the future");
+        }
+    }
+}

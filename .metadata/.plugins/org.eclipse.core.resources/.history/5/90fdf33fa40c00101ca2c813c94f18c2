@@ -1,0 +1,5 @@
+package com.hrsystem.model;
+
+public class User {
+
+}

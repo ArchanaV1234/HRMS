@@ -1,0 +1,34 @@
+package com.excelr.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.excelr.model.Employee;
+import com.excelr.model.User;
+import com.excelr.repo.EmployeeRepository;
+
+import java.util.List;
+
+@Service
+public class EmployeeService {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    public List<User> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    public User getEmployeeById(Long id) {
+        return employeeRepository.findById(id).orElse(null);
+    }
+
+
+    public Employee addEmployee(Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    public void deleteEmployee(Long id) {
+        employeeRepository.deleteById(id);
+    }
+}
